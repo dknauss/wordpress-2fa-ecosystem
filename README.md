@@ -1,6 +1,8 @@
 # WordPress Two-Factor Authentication Ecosystem
 
-A developer-oriented reference for how major WordPress 2FA plugins store secrets, detect users, and validate codes. Useful if you're building a plugin that needs to integrate with an existing 2FA provider -- or if you're evaluating plugins for a project.
+A developer-oriented reference for how major WordPress 2FA plugins store secrets, detect users, and validate codes. Useful if you're building a plugin that needs to integrate with an existing 2FA provider -- or if you're evaluating plugins for a project. 
+
+You can use this information (and we've provided examples) for writing a simple mu-plugin bridge to connect most 2FA plugins with [Sudo for WordPress](https://github.com/dknauss/wp-sudo).
 
 ## Contents
 
