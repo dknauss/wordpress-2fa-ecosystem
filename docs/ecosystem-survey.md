@@ -221,16 +221,16 @@ $enabled = get_user_meta( $user_id, 'tfa_enable_tfa', true );
 ```php
 global $simba_two_factor_authentication;
 
-if ( $simba_two_factor_authentication && method_exists( $simba_two_factor_authentication, 'authUserFromLogin' ) ) {
+if ( $simba_two_factor_authentication && method_exists( $simba_two_factor_authentication, 'authorise_user_from_login' ) ) {
     $params = array(
         'log' => $user->user_login,
         'caller' => 'external',  // identifies the calling context
     );
-    $result = $simba_two_factor_authentication->authUserFromLogin( $params );
+    $result = $simba_two_factor_authentication->authorise_user_from_login( $params );
 }
 ```
 
-**Important:** The Simba TFA engine reads the code from `$_POST['two_factor_code']` internally. You need to copy your submitted field value into that key before calling `authUserFromLogin()`:
+**Important:** The Simba TFA engine reads the code from `$_POST['two_factor_code']` internally. You need to copy your submitted field value into that key before calling `authorise_user_from_login()`:
 
 ```php
 $_POST['two_factor_code'] = $submitted_code;
@@ -242,12 +242,12 @@ $_POST['two_factor_code'] = $submitted_code;
 |------|-------|--------|
 | TOTP secret | `tfa_priv_key_64` user meta | Base64-encoded |
 | Enabled flag | `tfa_enable_tfa` user meta | Boolean-ish |
-| Algorithm | `tfa_algorithm_type` user meta | `'totp'` or `'hotp'` |
+| Trusted devices | `tfa_trusted_devices` user meta | Serialized array |
 
 ### Notes
 
 - AIOS wraps the Simba TFA library as a global object. You must access it via the `$simba_two_factor_authentication` global.
-- The `authUserFromLogin()` method has side effects -- it reads from `$_POST` directly. Plan accordingly.
+- The `authorise_user_from_login()` method has side effects -- it reads from `$_POST` directly. Plan accordingly.
 - The TOTP secret is stored as base64, not encrypted. Similar trust model to the Two Factor plugin.
 
 ---
@@ -297,8 +297,11 @@ GoogleAuth->processOtp()
 ### Detection
 
 ```php
-$method = get_user_meta( $user_id, 'mo2f_selected_2factor_method', true );
+$method = get_user_meta( $user_id, 'currentMethod', true );
 // Returns method name string like 'Google Authenticator', 'miniOrange Soft Token', etc.
+// Note: miniOrange has restructured its meta storage across versions. The meta key
+// 'mo2f_configured_2FA_method' may appear nested inside array-valued meta entries
+// rather than as a standalone key. Always verify against the installed version.
 ```
 
 ### Validation
@@ -314,8 +317,8 @@ For the hosted/cloud methods, validation requires an API call to miniOrange serv
 
 | What | Where | Format |
 |------|-------|--------|
-| Selected method | `mo2f_selected_2factor_method` user meta | String |
-| Configuration status | `mo2f_configured_2FA_method` user meta | String |
+| Current method | `currentMethod` user meta | String |
+| Configuration status | `mo2f_configured_2FA_method` (nested in array meta) | String |
 | Secret (if local) | Varies by method | May be stored locally or in miniOrange cloud |
 
 ### Notes

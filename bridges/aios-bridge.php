@@ -76,7 +76,7 @@ add_action(
  * 3. VALIDATION — Verify the submitted TOTP code via Simba TFA.
  *
  * IMPORTANT: The Simba TFA engine reads from $_POST['two_factor_code'] internally.
- * We copy the submitted value into that key before calling authUserFromLogin().
+ * We copy the submitted value into that key before calling authorise_user_from_login().
  */
 add_filter(
 	'wp_sudo_validate_two_factor',
@@ -85,7 +85,7 @@ add_filter(
 			return true;
 		}
 
-		if ( ! class_exists( 'Simba_Two_Factor_Authentication' ) ) {
+		if ( ! class_exists( 'Simba_Two_Factor_Authentication_1' ) ) {
 			return $valid;
 		}
 
@@ -104,7 +104,7 @@ add_filter(
 
 		global $simba_two_factor_authentication;
 
-		if ( ! $simba_two_factor_authentication || ! method_exists( $simba_two_factor_authentication, 'authUserFromLogin' ) ) {
+		if ( ! $simba_two_factor_authentication || ! method_exists( $simba_two_factor_authentication, 'authorise_user_from_login' ) ) {
 			return $valid;
 		}
 
@@ -113,7 +113,7 @@ add_filter(
 			'caller' => 'external-bridge',
 		);
 
-		return (bool) $simba_two_factor_authentication->authUserFromLogin( $params );
+		return (bool) $simba_two_factor_authentication->authorise_user_from_login( $params );
 	},
 	10,
 	2

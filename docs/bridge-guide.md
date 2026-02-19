@@ -194,7 +194,7 @@ add_filter( 'your_host_validate_2fa', function ( bool $valid, \WP_User $user ): 
 | Two Factor | `$provider->validate_authentication( $user )` (reads from `$_POST` internally) |
 | WP 2FA | `Authentication::is_valid_authcode( $key, $code )` |
 | Wordfence | `Controller_TOTP::shared()->validate_2fa( $user, $code )` |
-| AIOS | `$simba_two_factor_authentication->authUserFromLogin( $params )` |
+| AIOS | `$simba_two_factor_authentication->authorise_user_from_login( $params )` |
 
 ---
 
