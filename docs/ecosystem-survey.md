@@ -18,7 +18,7 @@ How the major WordPress two-factor authentication plugins detect configured user
 ## Two Factor (WordPress/two-factor)
 
 **Plugin:** [wordpress.org/plugins/two-factor](https://wordpress.org/plugins/two-factor/)
-**Active installs:** 50,000+
+**Active installs:** 100,000+
 **Architecture:** Provider-based. Each 2FA method (TOTP, email, backup codes, WebAuthn) is a class extending `Two_Factor_Provider`.
 
 ### Detection
@@ -66,7 +66,7 @@ Each provider reads its own fields from `$_POST`. For TOTP, the field is `authco
 ## WP 2FA (Melapress)
 
 **Plugin:** [wordpress.org/plugins/wp-2fa](https://wordpress.org/plugins/wp-2fa/)
-**Active installs:** 60,000+
+**Active installs:** 90,000+
 **Architecture:** Centralized helper classes. Methods are identified by string slugs (`'totp'`, `'email'`).
 
 ### Detection
@@ -169,7 +169,7 @@ $valid = \WordfenceLS\Controller_TOTP::shared()->validate_2fa( $user, $code );
 ## Solid Security
 
 **Plugin:** [wordpress.org/plugins/better-wp-security](https://wordpress.org/plugins/better-wp-security/) (formerly iThemes Security)
-**Active installs:** 800,000+
+**Active installs:** 700,000+
 **Architecture:** Bundles the Two Factor plugin's provider classes internally.
 
 ### Detection
@@ -255,7 +255,7 @@ $_POST['two_factor_code'] = $submitted_code;
 ## Shield Security
 
 **Plugin:** [wordpress.org/plugins/wp-simple-firewall](https://wordpress.org/plugins/wp-simple-firewall/)
-**Active installs:** 50,000+
+**Active installs:** 40,000+
 **Architecture:** Deep container/controller system with heavy internal abstraction.
 
 ### Detection
@@ -291,7 +291,7 @@ GoogleAuth->processOtp()
 ## miniOrange Google Authenticator
 
 **Plugin:** [wordpress.org/plugins/miniorange-2-factor-authentication](https://wordpress.org/plugins/miniorange-2-factor-authentication/)
-**Active installs:** 20,000+
+**Active installs:** 10,000+
 **Architecture:** Cloud-first. Most 2FA validation happens through miniOrange's servers.
 
 ### Detection

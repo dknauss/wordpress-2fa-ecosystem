@@ -22,13 +22,13 @@ You can use this information (and we've provided examples) for writing a simple 
 
 | Plugin | Active Installs | Bridgeable? | Notes |
 |--------|----------------|-------------|-------|
-| [Two Factor](https://wordpress.org/plugins/two-factor/) | 50,000+ | Built-in to many hosts | Provider-based API. The reference implementation. |
-| [WP 2FA](https://wordpress.org/plugins/wp-2fa/) (Melapress) | 60,000+ | Yes | TOTP, email, backup codes. AES-256-CTR encrypted secrets. |
+| [Two Factor](https://wordpress.org/plugins/two-factor/) | 100,000+ | Built-in to many hosts | Provider-based API. The reference implementation. |
+| [WP 2FA](https://wordpress.org/plugins/wp-2fa/) (Melapress) | 90,000+ | Yes | TOTP, email, backup codes. AES-256-CTR encrypted secrets. |
 | [Wordfence Login Security](https://wordpress.org/plugins/wordfence/) | 5,000,000+ | Yes | TOTP only. Singleton class API, custom DB table. |
-| [Solid Security](https://wordpress.org/plugins/better-wp-security/) | 800,000+ | Likely automatic | Bundles Two Factor provider classes internally. |
+| [Solid Security](https://wordpress.org/plugins/better-wp-security/) | 700,000+ | Likely automatic | Bundles Two Factor provider classes internally. |
 | [All-In-One Security](https://wordpress.org/plugins/all-in-one-wp-security-and-firewall/) | 1,000,000+ | Yes | Embeds Simba TFA engine. User meta storage. |
-| [Shield Security](https://wordpress.org/plugins/wp-simple-firewall/) | 50,000+ | No | Deeply encapsulated, no public API. |
-| [miniOrange Google Authenticator](https://wordpress.org/plugins/miniorange-2-factor-authentication/) | 20,000+ | No | Cloud-based validation, no local path. |
+| [Shield Security](https://wordpress.org/plugins/wp-simple-firewall/) | 40,000+ | No | Deeply encapsulated, no public API. |
+| [miniOrange Google Authenticator](https://wordpress.org/plugins/miniorange-2-factor-authentication/) | 10,000+ | No | Cloud-based validation, no local path. |
 
 ## Known Issues
 
