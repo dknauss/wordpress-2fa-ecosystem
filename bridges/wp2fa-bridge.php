@@ -19,6 +19,24 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! function_exists( 'wordpress_2fa_ecosystem_wp2fa_email_token_key' ) ) {
+	/**
+	 * Build a per-user, per-session transient key for debouncing email OTP sends.
+	 *
+	 * @param \WP_User $user The challenged user.
+	 * @return string
+	 */
+	function wordpress_2fa_ecosystem_wp2fa_email_token_key( \WP_User $user ): string {
+		$session_token = wp_get_session_token();
+
+		if ( '' === $session_token ) {
+			$session_token = 'anonymous-session';
+		}
+
+		return 'wp2fa_bridge_email_' . $user->ID . '_' . substr( wp_hash( $session_token ), 0, 12 );
+	}
+}
+
 /**
  * 1. DETECTION — Does this user have 2FA configured in WP 2FA?
  *
@@ -86,9 +104,14 @@ add_action(
 			</p>
 			<?php
 		} elseif ( 'email' === $method ) {
-			// Generate and send the email OTP now.
+			// Send one code per active challenge session so rerenders do not invalidate it.
 			if ( class_exists( '\WP2FA\Authenticator\Authentication' ) ) {
-				\WP2FA\Authenticator\Authentication::generate_token( $user->ID );
+				$transient_key = wordpress_2fa_ecosystem_wp2fa_email_token_key( $user );
+
+				if ( false === get_transient( $transient_key ) ) {
+					\WP2FA\Authenticator\Authentication::generate_token( $user->ID );
+					set_transient( $transient_key, time(), 5 * MINUTE_IN_SECONDS );
+				}
 			}
 			?>
 			<p>
@@ -177,6 +200,7 @@ add_filter(
 				}
 			} elseif ( 'email' === $method && class_exists( '\WP2FA\Authenticator\Authentication' ) ) {
 				if ( \WP2FA\Authenticator\Authentication::validate_token( $user, $code ) ) {
+					delete_transient( wordpress_2fa_ecosystem_wp2fa_email_token_key( $user ) );
 					return true;
 				}
 			}
@@ -185,6 +209,10 @@ add_filter(
 		// Try backup code fallback.
 		if ( ! empty( $backup_code ) && class_exists( '\WP2FA\Methods\Backup_Codes' ) ) {
 			if ( \WP2FA\Methods\Backup_Codes::validate_code( $user, $backup_code ) ) {
+				if ( 'email' === $method ) {
+					delete_transient( wordpress_2fa_ecosystem_wp2fa_email_token_key( $user ) );
+				}
+
 				return true;
 			}
 		}

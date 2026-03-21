@@ -19,6 +19,21 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! function_exists( 'wordpress_2fa_ecosystem_aios_is_available' ) ) {
+	/**
+	 * Check whether the AIOS Simba runtime is available for bridging.
+	 *
+	 * @return bool
+	 */
+	function wordpress_2fa_ecosystem_aios_is_available(): bool {
+		global $simba_two_factor_authentication;
+
+		return class_exists( 'Simba_Two_Factor_Authentication_1' )
+			&& $simba_two_factor_authentication
+			&& method_exists( $simba_two_factor_authentication, 'authorise_user_from_login' );
+	}
+}
+
 /**
  * 1. DETECTION — Does this user have 2FA configured in AIOS?
  *
@@ -29,6 +44,10 @@ add_filter(
 	static function ( bool $needs, int $user_id ): bool {
 		if ( $needs ) {
 			return true;
+		}
+
+		if ( ! wordpress_2fa_ecosystem_aios_is_available() ) {
+			return $needs;
 		}
 
 		if ( ! get_user_meta( $user_id, 'tfa_enable_tfa', true ) ) {
@@ -49,6 +68,10 @@ add_filter(
 add_action(
 	'wp_sudo_render_two_factor_fields',
 	static function ( \WP_User $user ): void {
+		if ( ! wordpress_2fa_ecosystem_aios_is_available() ) {
+			return;
+		}
+
 		if ( ! get_user_meta( $user->ID, 'tfa_enable_tfa', true ) ) {
 			return;
 		}
@@ -85,7 +108,7 @@ add_filter(
 			return true;
 		}
 
-		if ( ! class_exists( 'Simba_Two_Factor_Authentication_1' ) ) {
+		if ( ! wordpress_2fa_ecosystem_aios_is_available() ) {
 			return $valid;
 		}
 
@@ -98,22 +121,29 @@ add_filter(
 			return false;
 		}
 
-		// Simba TFA reads from $_POST['two_factor_code'] internally.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$_POST['two_factor_code'] = $code;
-
 		global $simba_two_factor_authentication;
-
-		if ( ! $simba_two_factor_authentication || ! method_exists( $simba_two_factor_authentication, 'authorise_user_from_login' ) ) {
-			return $valid;
-		}
 
 		$params = array(
 			'log'    => $user->user_login,
 			'caller' => 'external-bridge',
 		);
 
-		return (bool) $simba_two_factor_authentication->authorise_user_from_login( $params );
+		$had_existing_code = array_key_exists( 'two_factor_code', $_POST );
+		$existing_code     = $had_existing_code ? $_POST['two_factor_code'] : null;
+
+		// Simba TFA reads from $_POST['two_factor_code'] internally.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$_POST['two_factor_code'] = $code;
+
+		try {
+			return (bool) $simba_two_factor_authentication->authorise_user_from_login( $params );
+		} finally {
+			if ( $had_existing_code ) {
+				$_POST['two_factor_code'] = $existing_code;
+			} else {
+				unset( $_POST['two_factor_code'] );
+			}
+		}
 	},
 	10,
 	2

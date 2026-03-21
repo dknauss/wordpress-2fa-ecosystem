@@ -19,5 +19,5 @@ These are working examples of the three-hook bridge pattern described in the [Br
 ## Notes
 
 - As written, these bridges use **WP Sudo's hook names** as concrete examples. If you're integrating with a different host plugin, change the hook names in `add_filter()` and `add_action()` calls.
-- All bridges are safe to load when the 2FA plugin is not active -- `class_exists()` checks ensure they silently no-op.
+- All bridges are safe to load when the 2FA plugin is not active. They guard on plugin runtime availability and silently no-op when the backing 2FA implementation is missing.
 - All bridges respect the `$needs`/`$valid` pass-through pattern, allowing multiple bridges to coexist.

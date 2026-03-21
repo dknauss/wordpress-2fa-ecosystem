@@ -108,16 +108,21 @@ add_action( 'your_host_render_2fa_fields', function ( \WP_User $user ): void {
 
 ### Email OTP: Triggering the send
 
-For email-based 2FA, the render hook is where you trigger sending the email:
+For email-based 2FA, the render hook is usually where you trigger sending the email. Do not blindly send a fresh code on every render, though, or a retry/refresh can invalidate the code the user just received. Debounce the send per challenge or per session:
 
 ```php
 // Inside the render callback, before outputting the input:
 if ( 'email' === $method ) {
-    Your_2FA_Plugin::send_email_code( $user->ID );
+    $challenge_key = 'my_bridge_email_' . $user->ID . '_' . wp_hash( wp_get_session_token() );
+
+    if ( false === get_transient( $challenge_key ) ) {
+        Your_2FA_Plugin::send_email_code( $user->ID );
+        set_transient( $challenge_key, time(), 5 * MINUTE_IN_SECONDS );
+    }
 }
 ```
 
-The user sees the input field and checks their email for the code.
+Clear the debounce marker after a successful validation so a later challenge can send a fresh code. The user sees the input field and checks their email for the code that belongs to the current challenge.
 
 ### Backup code fallback
 
