@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest an improvement to bridge coverage, docs, or workflows.
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the bridge, research, or workflow improvement you want.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Include upstream plugin links, references, or prior art.
