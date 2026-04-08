@@ -1,0 +1,29 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "steps": [
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "wordpress.org/plugins",
+        "slug": "wp-2fa"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "wordpress.org/plugins",
+        "slug": "all-in-one-wp-security-and-firewall"
+      },
+      "options": {
+        "activate": true
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "require '/workspace/tests/playground/bridge-smoke.php';"
+    }
+  ]
+}
