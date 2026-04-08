@@ -1,5 +1,8 @@
 # WordPress Two-Factor Authentication Ecosystem
 
+[![PHP Lint](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/php-lint.yml/badge.svg)](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/php-lint.yml)
+[![Playground Smoke](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/playground-smoke.yml/badge.svg)](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/playground-smoke.yml)
+
 A developer-oriented reference for how major WordPress 2FA plugins store secrets, detect users, and validate codes. Useful if you're building a plugin that needs to integrate with an existing 2FA provider -- or if you're evaluating plugins for a project. 
 
 You can use this information (and we've provided examples) for writing a simple mu-plugin bridge to connect most 2FA plugins with [Sudo for WordPress](https://github.com/dknauss/wp-sudo).
@@ -10,6 +13,7 @@ You can use this information (and we've provided examples) for writing a simple 
 |----------|-------------|
 | [Ecosystem Survey](docs/ecosystem-survey.md) | How each major plugin stores TOTP keys, detects configured users, and validates codes. Covers 7 plugins with class names, method signatures, and storage details. |
 | [Bridge Development Guide](docs/bridge-guide.md) | A pattern for building lightweight glue code between a 2FA plugin and any host plugin that delegates 2FA via hooks. Includes a generic three-hook architecture and concrete examples. |
+| [Changelog](CHANGELOG.md) | Project release history and verification-related updates. |
 | [bridges/](bridges/) | Drop-in example bridges for WP 2FA (Melapress), Wordfence, and AIOS. |
 
 ## Who This Is For
@@ -51,7 +55,7 @@ Found an inaccuracy? A plugin updated its internals? PRs and issues welcome. The
 This repo includes two lightweight verification layers:
 
 - **PHP lint** for the example bridge files.
-- **WordPress Playground smoke tests** that install the real WP 2FA and AIOS plugins from WordPress.org and exercise the example bridges against vendor code.
+- **WordPress Playground smoke tests** that install the real WP 2FA, Wordfence, and AIOS plugins from WordPress.org and exercise the example bridges against vendor code.
 
 Run the Playground smoke test locally:
 

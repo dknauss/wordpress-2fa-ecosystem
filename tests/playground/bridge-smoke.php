@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 
 require_once '/workspace/bridges/wp2fa-bridge.php';
 require_once '/workspace/bridges/aios-bridge.php';
+require_once '/workspace/bridges/wordfence-bridge.php';
 
 /**
  * Record a failure when a condition is not met.
@@ -128,10 +129,44 @@ wordpress_2fa_ecosystem_smoke_assert(
 	$failures
 );
 
-// Validation should clear the debounce marker so the next challenge can send a fresh token.
-$email_token               = \WP2FA\Authenticator\Authentication::generate_token( $user_id );
-$_POST['wp2fa_authcode']   = $email_token;
-$validation_result         = apply_filters( 'wp_sudo_validate_two_factor', false, $user );
+// Backup-code fallback should validate and consume the code.
+$backup_code       = 'bridge-backup-code';
+$backup_code_hash  = wp_hash_password( $backup_code );
+update_user_meta( $user_id, 'wp_2fa_backup_codes', array( $backup_code_hash ) );
+
+$_POST['wp2fa_backup_code'] = $backup_code;
+$backup_validation_result   = apply_filters( 'wp_sudo_validate_two_factor', false, $user );
+$remaining_backup_codes     = get_user_meta( $user_id, 'wp_2fa_backup_codes', true );
+
+wordpress_2fa_ecosystem_smoke_assert(
+	true === $backup_validation_result,
+	'WP 2FA bridge should validate a real backup code.',
+	$failures
+);
+
+wordpress_2fa_ecosystem_smoke_assert(
+	false === get_transient( $transient_key ),
+	'WP 2FA bridge should clear the debounce marker after backup-code validation.',
+	$failures
+);
+
+wordpress_2fa_ecosystem_smoke_assert(
+	empty( $remaining_backup_codes ),
+	'WP 2FA bridge should consume a backup code after successful validation.',
+	$failures
+);
+
+unset( $_POST['wp2fa_backup_code'] );
+
+// Validation should also clear the debounce marker for the primary email path.
+ob_start();
+do_action( 'wp_sudo_render_two_factor_fields', $user );
+ob_end_clean();
+
+$refreshed_token_hash = \WP2FA\Admin\Helpers\User_Helper::get_email_token_for_user( $user );
+$email_token          = \WP2FA\Authenticator\Authentication::generate_token( $user_id );
+$_POST['wp2fa_authcode'] = $email_token;
+$validation_result       = apply_filters( 'wp_sudo_validate_two_factor', false, $user );
 $post_validation_transient = get_transient( $transient_key );
 
 wordpress_2fa_ecosystem_smoke_assert(
@@ -146,7 +181,88 @@ wordpress_2fa_ecosystem_smoke_assert(
 	$failures
 );
 
+wordpress_2fa_ecosystem_smoke_assert(
+	$refreshed_token_hash !== $second_token_hash,
+	'WP 2FA bridge should generate a fresh email token after a successful fallback challenge.',
+	$failures
+);
+
 unset( $_POST['wp2fa_authcode'] );
+
+// Wordfence bridge: detect/render/validate using a real activated recovery-code setup.
+$wordfence_user_id = wp_insert_user(
+	array(
+		'user_login' => 'wordfence-bridge-user',
+		'user_pass'  => 'password',
+		'user_email' => 'wordfence-bridge@example.com',
+		'role'       => 'administrator',
+	)
+);
+
+if ( is_wp_error( $wordfence_user_id ) ) {
+	$failures[] = $wordfence_user_id->get_error_message();
+} else {
+	$wordfence_user = get_userdata( $wordfence_user_id );
+
+	$wordfence_requires_before = apply_filters( 'wp_sudo_requires_two_factor', false, $wordfence_user_id );
+	wordpress_2fa_ecosystem_smoke_assert(
+		false === $wordfence_requires_before,
+		'Wordfence bridge should not require 2FA before Wordfence 2FA is activated for the user.',
+		$failures
+	);
+
+	ob_start();
+	do_action( 'wp_sudo_render_two_factor_fields', $wordfence_user );
+	$wordfence_render_before = trim( ob_get_clean() );
+	wordpress_2fa_ecosystem_smoke_assert(
+		'' === $wordfence_render_before,
+		'Wordfence bridge should not render fields for an unconfigured user.',
+		$failures
+	);
+
+	$wordfence_secret        = '1234567890abcdef1234567890abcdef';
+	$wordfence_recovery_code = '1234567890abcdef';
+
+	\WordfenceLS\Controller_TOTP::shared()->activate_2fa(
+		$wordfence_user,
+		$wordfence_secret,
+		array( $wordfence_recovery_code )
+	);
+
+	$wordfence_requires_after = apply_filters( 'wp_sudo_requires_two_factor', false, $wordfence_user_id );
+	wordpress_2fa_ecosystem_smoke_assert(
+		true === $wordfence_requires_after,
+		'Wordfence bridge should require 2FA after Wordfence activates 2FA for the user.',
+		$failures
+	);
+
+	ob_start();
+	do_action( 'wp_sudo_render_two_factor_fields', $wordfence_user );
+	$wordfence_render_after = ob_get_clean();
+	wordpress_2fa_ecosystem_smoke_assert(
+		false !== strpos( $wordfence_render_after, 'wf_2fa_code' ),
+		'Wordfence bridge should render its challenge field for a configured user.',
+		$failures
+	);
+
+	$_POST['wf_2fa_code'] = '1234 5678 90ab cdef';
+	$wordfence_validation = apply_filters( 'wp_sudo_validate_two_factor', false, $wordfence_user );
+	wordpress_2fa_ecosystem_smoke_assert(
+		true === $wordfence_validation,
+		'Wordfence bridge should validate a real recovery code through the Wordfence controller.',
+		$failures
+	);
+
+	$_POST['wf_2fa_code'] = '1234 5678 90ab cdef';
+	$wordfence_reuse = apply_filters( 'wp_sudo_validate_two_factor', false, $wordfence_user );
+	wordpress_2fa_ecosystem_smoke_assert(
+		false === $wordfence_reuse,
+		'Wordfence bridge should not allow a consumed recovery code to be reused.',
+		$failures
+	);
+
+	unset( $_POST['wf_2fa_code'] );
+}
 
 $result = array(
 	'success'  => 0 === count( $failures ),
