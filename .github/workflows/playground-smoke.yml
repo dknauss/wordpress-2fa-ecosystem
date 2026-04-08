@@ -7,6 +7,11 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        wp-version: ['latest', '6.8']
+        php-version: ['8.2', '8.3']
 
     steps:
       - name: Check out repository
@@ -18,4 +23,7 @@ jobs:
           node-version: '24'
 
       - name: Run Playground smoke test
+        env:
+          WP_PLAYGROUND_WP_VERSION: ${{ matrix.wp-version }}
+          WP_PLAYGROUND_PHP_VERSION: ${{ matrix.php-version }}
         run: bash ./scripts/run-playground-smoke.sh

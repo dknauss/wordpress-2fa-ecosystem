@@ -2,6 +2,10 @@
   "$schema": "https://playground.wordpress.net/blueprint-schema.json",
   "steps": [
     {
+      "step": "runPHP",
+      "code": "require '/workspace/tests/playground/bridge-inactive-smoke.php';"
+    },
+    {
       "step": "installPlugin",
       "pluginData": {
         "resource": "wordpress.org/plugins",

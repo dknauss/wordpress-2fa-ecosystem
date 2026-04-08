@@ -9,4 +9,5 @@
 ## Verification
 
 - Added a repeatable WordPress Playground smoke test that installs the real AIOS and WP 2FA plugins from WordPress.org and exercises the example bridges against vendor code.
-- Added a GitHub Actions workflow to run the Playground smoke test on pushes and pull requests.
+- Added inactive-plugin smoke coverage so the example bridges continue to silently no-op when their backing plugin runtime is unavailable.
+- Added a GitHub Actions workflow to run the Playground smoke test on pushes and pull requests across a small WordPress/PHP matrix.

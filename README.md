@@ -45,3 +45,31 @@ This research is released under [GPL-2.0-or-later](LICENSE). The example bridge 
 ## Contributing
 
 Found an inaccuracy? A plugin updated its internals? PRs and issues welcome. The ecosystem moves fast -- class names and method signatures can change between major versions.
+
+## Testing
+
+This repo includes two lightweight verification layers:
+
+- **PHP lint** for the example bridge files.
+- **WordPress Playground smoke tests** that install the real WP 2FA and AIOS plugins from WordPress.org and exercise the example bridges against vendor code.
+
+Run the Playground smoke test locally:
+
+```bash
+bash ./scripts/run-playground-smoke.sh
+```
+
+You can also override the WordPress and PHP versions used by Playground:
+
+```bash
+WP_PLAYGROUND_WP_VERSION=6.8 WP_PLAYGROUND_PHP_VERSION=8.2 bash ./scripts/run-playground-smoke.sh
+```
+
+## Continuous Integration
+
+GitHub Actions runs:
+
+- `PHP Lint`
+- `Playground Smoke`
+
+The Playground workflow covers a small WordPress/PHP matrix so bridge regressions are checked across more than one runtime combination.
