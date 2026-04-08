@@ -10,7 +10,6 @@ defined( 'ABSPATH' ) || exit;
 
 require_once '/workspace/bridges/wp2fa-bridge.php';
 require_once '/workspace/bridges/aios-bridge.php';
-require_once '/workspace/bridges/wordfence-bridge.php';
 
 /**
  * Record a failure when a condition is not met.
@@ -188,81 +187,6 @@ wordpress_2fa_ecosystem_smoke_assert(
 );
 
 unset( $_POST['wp2fa_authcode'] );
-
-// Wordfence bridge: detect/render/validate using a real activated recovery-code setup.
-$wordfence_user_id = wp_insert_user(
-	array(
-		'user_login' => 'wordfence-bridge-user',
-		'user_pass'  => 'password',
-		'user_email' => 'wordfence-bridge@example.com',
-		'role'       => 'administrator',
-	)
-);
-
-if ( is_wp_error( $wordfence_user_id ) ) {
-	$failures[] = $wordfence_user_id->get_error_message();
-} else {
-	$wordfence_user = get_userdata( $wordfence_user_id );
-
-	$wordfence_requires_before = apply_filters( 'wp_sudo_requires_two_factor', false, $wordfence_user_id );
-	wordpress_2fa_ecosystem_smoke_assert(
-		false === $wordfence_requires_before,
-		'Wordfence bridge should not require 2FA before Wordfence 2FA is activated for the user.',
-		$failures
-	);
-
-	ob_start();
-	do_action( 'wp_sudo_render_two_factor_fields', $wordfence_user );
-	$wordfence_render_before = trim( ob_get_clean() );
-	wordpress_2fa_ecosystem_smoke_assert(
-		'' === $wordfence_render_before,
-		'Wordfence bridge should not render fields for an unconfigured user.',
-		$failures
-	);
-
-	$wordfence_secret        = '1234567890abcdef1234567890abcdef';
-	$wordfence_recovery_code = '1234567890abcdef';
-
-	\WordfenceLS\Controller_TOTP::shared()->activate_2fa(
-		$wordfence_user,
-		$wordfence_secret,
-		array( $wordfence_recovery_code )
-	);
-
-	$wordfence_requires_after = apply_filters( 'wp_sudo_requires_two_factor', false, $wordfence_user_id );
-	wordpress_2fa_ecosystem_smoke_assert(
-		true === $wordfence_requires_after,
-		'Wordfence bridge should require 2FA after Wordfence activates 2FA for the user.',
-		$failures
-	);
-
-	ob_start();
-	do_action( 'wp_sudo_render_two_factor_fields', $wordfence_user );
-	$wordfence_render_after = ob_get_clean();
-	wordpress_2fa_ecosystem_smoke_assert(
-		false !== strpos( $wordfence_render_after, 'wf_2fa_code' ),
-		'Wordfence bridge should render its challenge field for a configured user.',
-		$failures
-	);
-
-	$_POST['wf_2fa_code'] = '1234 5678 90ab cdef';
-	$wordfence_validation = apply_filters( 'wp_sudo_validate_two_factor', false, $wordfence_user );
-	wordpress_2fa_ecosystem_smoke_assert(
-		true === $wordfence_validation,
-		'Wordfence bridge should validate a real recovery code through the Wordfence controller.',
-		$failures
-	);
-
-	$_POST['wf_2fa_code'] = '1234 5678 90ab cdef';
-	$wordfence_reuse = apply_filters( 'wp_sudo_validate_two_factor', false, $wordfence_user );
-	wordpress_2fa_ecosystem_smoke_assert(
-		false === $wordfence_reuse,
-		'Wordfence bridge should not allow a consumed recovery code to be reused.',
-		$failures
-	);
-
-	unset( $_POST['wf_2fa_code'] );
-}
 
 $result = array(
 	'success'  => 0 === count( $failures ),

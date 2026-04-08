@@ -52,10 +52,11 @@ Found an inaccuracy? A plugin updated its internals? PRs and issues welcome. The
 
 ## Testing
 
-This repo includes two lightweight verification layers:
+This repo includes lightweight verification layers:
 
 - **PHP lint** for the example bridge files.
-- **WordPress Playground smoke tests** that install the real WP 2FA, Wordfence, and AIOS plugins from WordPress.org and exercise the example bridges against vendor code.
+- **WordPress Playground smoke tests** that install the real WP 2FA and AIOS plugins from WordPress.org and exercise those example bridges against vendor code, including the WP 2FA backup-code fallback path.
+- **Vendor compatibility checks** that verify the Wordfence bridge still targets real classes and methods present in the current Wordfence plugin package.
 
 Run the Playground smoke test locally:
 
@@ -75,5 +76,6 @@ GitHub Actions runs:
 
 - `PHP Lint`
 - `Playground Smoke`
+- `Wordfence Bridge Compatibility`
 
 The Playground workflow covers a small WordPress/PHP matrix so bridge regressions are checked across more than one runtime combination.

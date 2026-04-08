@@ -1,0 +1,16 @@
+name: Wordfence Bridge Compatibility
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify Wordfence bridge target APIs
+        run: bash ./scripts/check-wordfence-bridge.sh

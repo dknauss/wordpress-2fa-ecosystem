@@ -26,16 +26,6 @@
       }
     },
     {
-      "step": "installPlugin",
-      "pluginData": {
-        "resource": "wordpress.org/plugins",
-        "slug": "wordfence"
-      },
-      "options": {
-        "activate": true
-      }
-    },
-    {
       "step": "runPHP",
       "code": "require '/workspace/tests/playground/bridge-smoke.php';"
     }

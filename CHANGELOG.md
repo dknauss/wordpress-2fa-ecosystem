@@ -5,8 +5,8 @@
 ### Added
 
 - README workflow badges for `PHP Lint` and `Playground Smoke`.
-- Real-plugin Playground smoke coverage for the Wordfence bridge.
 - Real-plugin Playground smoke coverage for the WP 2FA backup-code fallback path.
+- Source-grounded compatibility verification for the Wordfence bridge against the current Wordfence plugin package.
 
 ### Changed
 
