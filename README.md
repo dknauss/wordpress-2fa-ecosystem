@@ -1,6 +1,6 @@
 # WordPress Two-Factor Authentication Ecosystem
 
-[![PHP Lint](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/php-lint.yml/badge.svg)](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/php-lint.yml)
+[![PHP Lint](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/php-lint.yml/badge.svg)](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/php-lint.yml) [![License](https://img.shields.io/github/license/dknauss/wordpress-2fa-ecosystem)](LICENSE) [![Latest Tag](https://img.shields.io/github/v/tag/dknauss/wordpress-2fa-ecosystem)](https://github.com/dknauss/wordpress-2fa-ecosystem/tags) [![Security Policy](https://img.shields.io/badge/security-policy-4c1)](SECURITY.md)
 [![Playground Smoke](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/playground-smoke.yml/badge.svg)](https://github.com/dknauss/wordpress-2fa-ecosystem/actions/workflows/playground-smoke.yml)
 
 A developer-oriented reference for how major WordPress 2FA plugins store secrets, detect users, and validate codes. Useful if you're building a plugin that needs to integrate with an existing 2FA provider -- or if you're evaluating plugins for a project. 
