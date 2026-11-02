@@ -5,7 +5,7 @@
 
 A developer-oriented reference for how major WordPress 2FA plugins store secrets, detect users, and validate codes. Useful if you're building a plugin that needs to integrate with an existing 2FA provider -- or if you're evaluating plugins for a project. 
 
-You can use this information (and we've provided examples) for writing a simple mu-plugin bridge to connect most 2FA plugins with [Sudo for WordPress](https://github.com/dknauss/wp-sudo).
+You can use this information (and we've provided examples) for writing a simple mu-plugin bridge to connect most 2FA plugins with [Sudo for WordPress](https://github.com/dknauss/wp-sudo) (now an archived research prototype; the bridge patterns still apply to any host plugin that delegates 2FA via hooks).
 
 ## Contents
 
@@ -24,23 +24,25 @@ You can use this information (and we've provided examples) for writing a simple 
 
 ## Plugins Covered
 
+_Active-install figures re-checked against WordPress.org on 2026-11-02._
+
 | Plugin | Active Installs | Bridgeable? | Notes |
 |--------|----------------|-------------|-------|
 | [Two Factor](https://wordpress.org/plugins/two-factor/) | 100,000+ | Built-in to many hosts | Provider-based API. The reference implementation. |
-| [WP 2FA](https://wordpress.org/plugins/wp-2fa/) (Melapress) | 90,000+ | Yes | TOTP, email, backup codes. AES-256-CTR encrypted secrets. |
+| [WP 2FA](https://wordpress.org/plugins/wp-2fa/) (Melapress) | 100,000+ | Yes | TOTP, email, backup codes. AES-256-CTR encrypted secrets. |
 | [Wordfence Login Security](https://wordpress.org/plugins/wordfence/) | 5,000,000+ | Yes | TOTP only. Singleton class API, custom DB table. |
 | [Solid Security](https://wordpress.org/plugins/better-wp-security/) | 700,000+ | Likely automatic | Bundles Two Factor provider classes internally. |
 | [All-In-One Security](https://wordpress.org/plugins/all-in-one-wp-security-and-firewall/) | 1,000,000+ | Yes | Embeds Simba TFA engine. User meta storage. |
-| [Shield Security](https://wordpress.org/plugins/wp-simple-firewall/) | 40,000+ | No | Deeply encapsulated, no public API. |
+| [Shield Security](https://wordpress.org/plugins/wp-simple-firewall/) | 30,000+ | No | Deeply encapsulated, no public API. |
 | [miniOrange Google Authenticator](https://wordpress.org/plugins/miniorange-2-factor-authentication/) | 10,000+ | No | Cloud-based validation, no local path. |
 
 ## Known Issues
 
 ### Two Factor plugin: Silent provider fallback
 
-When a user enables TOTP but the REST API call that saves the secret key fails silently, the Two Factor plugin enters an inconsistent state where TOTP is listed as enabled but no key exists. `get_primary_provider_for_user()` silently falls back to Backup Codes with no warning. This has been reported upstream as [WordPress/two-factor#796](https://github.com/WordPress/two-factor/issues/796).
+When a user enables TOTP but the REST API call that saves the secret key fails silently, the Two Factor plugin enters an inconsistent state where TOTP is listed as enabled but no key exists. `get_primary_provider_for_user()` silently falls back to Backup Codes with no warning. This was reported upstream as [WordPress/two-factor#796](https://github.com/WordPress/two-factor/issues/796) and has since been fixed by [#798](https://github.com/WordPress/two-factor/pull/798), which checks that a method is fully configured before it can be enabled. Sites on older Two Factor releases can still hit it.
 
-A related issue -- the profile form allows saving `_two_factor_enabled_providers` with TOTP listed even when no TOTP key has been validated -- is tracked at [WordPress/two-factor#797](https://github.com/WordPress/two-factor/issues/797).
+A related issue -- the profile form allows saving `_two_factor_enabled_providers` with TOTP listed even when no TOTP key has been validated -- was tracked at [WordPress/two-factor#797](https://github.com/WordPress/two-factor/issues/797) and is also fixed by #798.
 
 ## License
 
